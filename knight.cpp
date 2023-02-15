@@ -50,13 +50,13 @@ int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int
   return 2;
 }
 
-void frog_morphed(bool &state,int &remaining, int &HP){
+void tiny_morphed(bool &state,int &remaining, int &HP){
   state = true;
   remaining = 3;
   HP = (HP/5 )< 5 ? 1 : HP/5;
 }
 
-void frog_cleanse(bool &state,int &remaining, int &HP, const int MAX_HEALTH){
+void tiny_cleanse(bool &state,int &remaining, int &HP, const int MAX_HEALTH){
   state = false;
   remaining = 0;
   HP = HP*5 > MAX_HEALTH ? MAX_HEALTH : HP*5;
@@ -66,8 +66,15 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   ifstream input_file(file_input);
   string line1, line2;
   const int MAX_HEALTH = HP;
+
+  // TINY STATE
+  bool tinyState = false;
+  int tinyRemain = 0;
+
+  // FROG STATE !! 
   bool frogState = false;
-  int frogRemain = 0;
+  int  frogRemain = 0;
+  int levelBeforeFrog;
 
   // line1 : Is Stat, line2 : is Events
   getline(input_file, line1); // skip line1
@@ -92,9 +99,12 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     }
 
     // POTIONS AREA, !! implement cleanse
-    else if(event == 15)
-      remedy = (remedy + 1 )> 99 ? 99 : remedy + 1 ;
-
+    else if(event == 15){
+      if(tinyState)
+        tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
+      else
+        remedy = (remedy + 1 )> 99 ? 99 : remedy + 1 ;
+    }
     else if(event == 16)
       maidenkiss = (maidenkiss + 1 )> 99 ? 99 : maidenkiss + 1 ;
 
@@ -106,11 +116,11 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
             COMBAT
     ----------------------*/
 
-    // 1 -- 5 EVENTS, !! minion missing, not yet fam
+    // 1 -- 5 EVENTS, !! frog missing, not yet fam
     else if (event >= 1 && event <=7){
       // SKIP
       if (event == 6 || event ==7){
-        if(frogState) // will add minion later
+        if(tinyState) // will add frog later
           continue;
       }
       
@@ -128,10 +138,11 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
       // LOSE TO SHAMAN
       if (event == 6 && result == 0){
-        if(remedy)
+        tiny_morphed(tinyState, tinyRemain, HP);
+        if(remedy){
+          tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
           remedy--;
-        else
-          frog_morphed(frogState, frogRemain, HP);
+        }
       }
     }
 
@@ -144,10 +155,10 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     i++;
 
     // UNDER DE-BUFF
-    if(frogRemain)
-      frogRemain--;
-    else if (frogState && frogRemain == 0){
-      frog_cleanse(frogState, frogRemain, HP, MAX_HEALTH);
+    if(tinyRemain)
+      tinyRemain--;
+    else if (tinyState && tinyRemain == 0){
+      tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
     }
 
   }
