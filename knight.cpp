@@ -30,17 +30,19 @@ int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int
 
   // LOSE: 0
   if (level < levelO){
-    int damage;
-    damage = BASE_DAMAGE[event-1]*levelO*10;
-    HP = HP - damage;
+    if(event != 6 && event != 7){
+      int damage;
+      damage = BASE_DAMAGE[event-1]*levelO*10;
+      HP = HP - damage;
 
-    if (HP <= 0 && phoenixdown > 0){
-      HP = MAX_HEALTH;
-      phoenixdown--;
-    }
-    if (HP <= 0 && phoenixdown == 0){
-      // DEAD: -1
-      return -1;
+      if (HP <= 0 && phoenixdown > 0){
+        HP = MAX_HEALTH;
+        phoenixdown--;
+      }
+      if (HP <= 0 && phoenixdown == 0){
+        // DEAD: -1
+        return -1;
+      }
     }
     return 0;
   }
@@ -54,10 +56,10 @@ void frog_morphed(bool &state,int &remaining, int &HP){
   HP = (HP/5 )< 5 ? 1 : HP/5;
 }
 
-void frog_cleanse(bool &state,int &remaining, int &HP){
+void frog_cleanse(bool &state,int &remaining, int &HP, const int MAX_HEALTH){
   state = false;
   remaining = 0;
-  HP = HP*5;
+  HP = HP*5 > MAX_HEALTH ? MAX_HEALTH : HP*5;
 }
 
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue) {
@@ -82,14 +84,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
        THIS AREA IS MAINLY
             PRE-COMBAT & MISCS
     --------------------------*/
-
-    // UNDER DE-BUFF
-    if(frogRemain)
-      frogRemain--;
-    else if (frogState && frogRemain == 0){
-      frog_cleanse(frogState, frogRemain, HP);
-    }
-
     // SUCCESSFUL
     if (event == 0){
       rescue = 1;
@@ -112,8 +106,15 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
             COMBAT
     ----------------------*/
 
-    // 1 -- 5 EVENTS
+    // 1 -- 5 EVENTS, !! minion missing, not yet fam
     else if (event >= 1 && event <=7){
+      // SKIP
+      if (event == 6 || event ==7){
+        if(frogState) // will add minion later
+          continue;
+      }
+      
+      // ENTER COMBAT
       int b = i%10;
       int levelO = i>6 ? (b>5?b:5) : b;
       int result = combat(level, levelO, event, MAX_HEALTH, HP, phoenixdown);
@@ -124,14 +125,31 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
         return;
       }
+
+      // LOSE TO SHAMAN
+      if (event == 6 && result == 0){
+        if(remedy)
+          remedy--;
+        else
+          frog_morphed(frogState, frogRemain, HP);
+      }
     }
 
     /*--------------------- 
        THIS AREA IS MAINLY
           POST-COMBAT
     ----------------------*/
+
     display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
     i++;
+
+    // UNDER DE-BUFF
+    if(frogRemain)
+      frogRemain--;
+    else if (frogState && frogRemain == 0){
+      frog_cleanse(frogState, frogRemain, HP, MAX_HEALTH);
+    }
+
   }
 
   // AT THIS STATE, NO MORE EVENTS
