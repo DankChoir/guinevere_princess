@@ -62,6 +62,18 @@ void tiny_cleanse(bool &state,int &remaining, int &HP, const int MAX_HEALTH){
   HP = HP*5 > MAX_HEALTH ? MAX_HEALTH : HP*5;
 }
 
+void frog_morphed(bool &state,int &remaining, int &level){
+  state = true;
+  remaining = 3;
+  level = 1;
+}
+
+void frog_cleanse(bool &state, int &remaining, int&level, const int levelBeforeFrog){
+  state = false;
+  remaining = 0;
+  level = levelBeforeFrog;
+}
+
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue) {
   ifstream input_file(file_input);
   string line1, line2;
@@ -98,15 +110,20 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       return;
     }
 
-    // POTIONS AREA, !! implement cleanse
+    // POTIONS AREA
     else if(event == 15){
       if(tinyState)
         tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
       else
         remedy = (remedy + 1 )> 99 ? 99 : remedy + 1 ;
-    }
-    else if(event == 16)
-      maidenkiss = (maidenkiss + 1 )> 99 ? 99 : maidenkiss + 1 ;
+    } // --> REMEDY
+
+    else if(event == 16){
+      if(frogState)
+        frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
+      else
+        maidenkiss = (maidenkiss + 1 )> 99 ? 99 : maidenkiss + 1 ;
+    } // --> MAIDENKISS
 
     else if(event == 17)
       phoenixdown = (phoenixdown + 1 )> 99 ? 99 : phoenixdown + 1 ;
@@ -120,7 +137,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     else if (event >= 1 && event <=7){
       // SKIP
       if (event == 6 || event ==7){
-        if(tinyState) // will add frog later
+        if(tinyState || frogState) 
           continue;
       }
       
@@ -137,11 +154,22 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       }
 
       // LOSE TO SHAMAN
-      if (event == 6 && result == 0){
+      else if (event == 6 && result == 0){
         tiny_morphed(tinyState, tinyRemain, HP);
         if(remedy){
           tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
           remedy--;
+        }
+      }
+
+      // LOSE TO Vajsh
+      else if (event == 7 && result == 0){
+        // SAVE LEVEL BEFORE FROG-ed
+        levelBeforeFrog = level; 
+        frog_morphed(frogState, frogRemain, level);
+        if(maidenkiss){
+          frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
+          maidenkiss--;
         }
       }
     }
@@ -159,6 +187,12 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       tinyRemain--;
     else if (tinyState && tinyRemain == 0){
       tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
+    }
+
+    if(frogRemain)
+      frogRemain--;
+    else if (frogState && frogRemain == 0){
+      frog_cleanse(tinyState, tinyRemain, level, levelBeforeFrog);
     }
 
   }
