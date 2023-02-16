@@ -46,7 +46,7 @@ bool isKing(const int MAX_HEALTH){
 }
 
 bool isLancelot(const int MAX_HEALTH){
-  return ((isPrime(MAX_HEALTH)) ? true : false);
+  return (isPrime(MAX_HEALTH)) ;
 }
 
 int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int &phoenixdown){
@@ -124,7 +124,7 @@ void frog_cleanse(bool &state, int &remaining, int&level, const int levelBeforeF
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue) {
   ifstream input_file(file_input);
   string line1, line2;
-  const int MAX_HEALTH = HP;
+  rescue = -1;
 
   // TINY STATE
   bool tinyState = false;
@@ -136,7 +136,10 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   int levelBeforeFrog;
 
   // line1 : Is Stat, line2 : is Events
-  getline(input_file, line1); // skip line1
+  getline(input_file, line1);
+  istringstream stats(line1);
+  stats >> HP >> level >> remedy >> maidenkiss >> phoenixdown;
+  const int MAX_HEALTH = HP;
   getline(input_file, line2); 
   istringstream events(line2);
 
