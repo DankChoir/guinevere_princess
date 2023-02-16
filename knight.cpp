@@ -15,6 +15,19 @@ void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int
 // Global 
 const float BASE_DAMAGE[5] = {1,1.5,4.5,7.5,9.5};
 
+bool isPrime(const int a){
+  if (a<=1)
+    return false;
+  if (a==2)
+    return true;
+
+  for(int i=2; i*i <= a; i++){
+    if(a%i==0)
+      return false;
+  }
+  return true;
+}
+
 int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int &phoenixdown){
   // WIN: 1
   if (level > levelO){
@@ -33,13 +46,14 @@ int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int
     if(event != 6 && event != 7){
       int damage;
       damage = BASE_DAMAGE[event-1]*levelO*10;
+      cout << " damage: " << damage << "    "; // DEBUG
       HP = HP - damage;
 
       if (HP <= 0 && phoenixdown > 0){
         HP = MAX_HEALTH;
         phoenixdown--;
       }
-      if (HP <= 0 && phoenixdown == 0){
+      else if (HP <= 0 && phoenixdown == 0){
         // DEAD: -1
         return -1;
       }
@@ -83,7 +97,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   bool tinyState = false;
   int tinyRemain = 0;
 
-  // FROG STATE !! 
+  // FROG STATE 
   bool frogState = false;
   int  frogRemain = 0;
   int levelBeforeFrog;
@@ -109,8 +123,21 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
       return;
     }
+    /*--------------------- 
+       THIS AREA IS MAINLY
+          MUSHROOMS EVENTS
+    ----------------------*/
+    else if (event == 11){
+      display(HP, level, remedy, maidenkiss, phoenixdown, rescue); // DEBUG DEBUG DEBUG
+      int n1 = ((level + phoenixdown)%5 + 1)*3;
+      int s1 = n1*(100-n1);
+      HP += s1%100; // Then HP is incremented to the nearest prime !!
+    } 
 
-    // POTIONS AREA
+    /*--------------------- 
+       THIS AREA IS MAINLY
+            POTIONS EVENTS
+    ----------------------*/
     else if(event == 15){
       if(tinyState)
         tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
@@ -133,28 +160,32 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
             COMBAT
     ----------------------*/
 
-    // 1 -- 5 EVENTS, !! frog missing, not yet fam
+    // 1 -- 5 EVENTS !! maybe separating 6 7
     else if (event >= 1 && event <=7){
       // SKIP
       if (event == 6 || event ==7){
-        if(tinyState || frogState) 
-          continue;
+        if(tinyState || frogState) {
+          // display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+          // i++;
+          // continue; // ko co frogState tinyState m,ai sua
+          goto postfight;
+        }
       }
       
       // ENTER COMBAT
       int b = i%10;
-      int levelO = i>6 ? (b>5?b:5) : b;
-      int result = combat(level, levelO, event, MAX_HEALTH, HP, phoenixdown);
-
+      int levelO = (i>6) ? ((b>5)?b:5) : b;
+      int victory = combat(level, levelO, event, MAX_HEALTH, HP, phoenixdown);
+      cout << "Mob's level : " << levelO << " "; // DEBUG
       // IN CASE DEAD
-      if (result == -1){
+      if (victory == -1){
         rescue = 0;
         display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
         return;
       }
 
       // LOSE TO SHAMAN
-      else if (event == 6 && result == 0){
+      else if (event == 6 && victory == 0){
         tiny_morphed(tinyState, tinyRemain, HP);
         if(remedy){
           tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
@@ -163,7 +194,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       }
 
       // LOSE TO Vajsh
-      else if (event == 7 && result == 0){
+      else if (event == 7 && victory == 0){
         // SAVE LEVEL BEFORE FROG-ed
         levelBeforeFrog = level; 
         frog_morphed(frogState, frogRemain, level);
@@ -178,22 +209,23 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
        THIS AREA IS MAINLY
           POST-COMBAT
     ----------------------*/
+    postfight:
 
-    display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-    i++;
+      display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+      i++;
 
-    // UNDER DE-BUFF
-    if(tinyRemain)
-      tinyRemain--;
-    else if (tinyState && tinyRemain == 0){
-      tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
-    }
+      // Checking DE-BUFFs : Tiny & Frog State
+      if(tinyRemain)
+        tinyRemain--;
+      else if (tinyState && tinyRemain == 0){
+        tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
+      }
 
-    if(frogRemain)
-      frogRemain--;
-    else if (frogState && frogRemain == 0){
-      frog_cleanse(tinyState, tinyRemain, level, levelBeforeFrog);
-    }
+      if(frogRemain)
+        frogRemain--;
+      else if (frogState && frogRemain == 0){
+        frog_cleanse(tinyState, tinyRemain, level, levelBeforeFrog);
+      }
 
   }
 
