@@ -15,8 +15,9 @@ void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int
 // Global & Enums
 const float BASE_DAMAGE[5] = {1,1.5,4.5,7.5,9.5};
 
-enum SPECIAL_EVENTS { Shaman = 6, Vajsh = 7, RemedyObtained = 15, MaidenKissObtained = 16, PhoenixDownObtained = 17};
+enum SPECIAL_EVENTS { Shaman = 6, Vajsh = 7, MushMario = 11 ,RemedyObtained = 15, MaidenKissObtained = 16, PhoenixDownObtained = 17};
 
+// Helper Functions
 bool isPrime(const int a){
   if (a<=1)
     return false;
@@ -28,6 +29,22 @@ bool isPrime(const int a){
       return false;
   }
   return true;
+}
+
+int nextPrime(const int a){
+  int i = (a%2==0) ? (a+1) : a;
+  while(!isPrime(i)){
+    i += 2;
+  }
+  return i;
+}
+
+bool isKing(const int MAX_HEALTH){
+  return ((MAX_HEALTH == 999) ? true : false);
+}
+
+bool isLancelot(const int MAX_HEALTH){
+  return ((isPrime(MAX_HEALTH)) ? true : false);
 }
 
 int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int &phoenixdown){
@@ -90,6 +107,7 @@ void frog_cleanse(bool &state, int &remaining, int&level, const int levelBeforeF
   level = levelBeforeFrog;
 }
 
+// MAIN ADVENTURE FUNCTION
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue) {
   ifstream input_file(file_input);
   string line1, line2;
@@ -129,12 +147,14 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
        THIS AREA IS MAINLY
           MUSHROOMS EVENTS
     ----------------------*/
-    else if (event == 11){
-      display(HP, level, remedy, maidenkiss, phoenixdown, rescue); // DEBUG DEBUG DEBUG
+    else if (event == MushMario){
       int n1 = ((level + phoenixdown)%5 + 1)*3;
       int s1 = n1*(100-n1);
-      HP += s1%100; // Then HP is incremented to the nearest prime !!
-    } 
+
+      HP += s1%100; 
+      int nextPrimeHP = nextPrime(HP);
+      HP = (nextPrimeHP > MAX_HEALTH) ? MAX_HEALTH : nextPrimeHP;
+     } 
 
     /*--------------------- 
        THIS AREA IS MAINLY
