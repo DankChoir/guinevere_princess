@@ -48,8 +48,9 @@ bool isLancelot(const int MAX_HEALTH){
 }
 
 int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int &phoenixdown){
+
   // WIN: 1
-  if (level > levelO){
+  if ((level > levelO) || isKing(MAX_HEALTH) || isLancelot(MAX_HEALTH)){
     // REGULAR MOBS
     if (event >= 1 && event <=5)
       level = (level +1 ) > 10 ? 10 : level +1;
