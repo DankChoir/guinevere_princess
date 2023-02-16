@@ -15,7 +15,9 @@ void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int
 // Global & Enums
 const float BASE_DAMAGE[5] = {1,1.5,4.5,7.5,9.5};
 
-enum SPECIAL_EVENTS { Shaman = 6, Vajsh = 7, MushMario = 11 ,RemedyObtained = 15, MaidenKissObtained = 16, PhoenixDownObtained = 17};
+enum SPECIAL_EVENTS { Shaman = 6, Vajsh = 7, Bowser = 99,
+                      MushMario = 11 ,
+                      RemedyObtained = 15, MaidenKissObtained = 16, PhoenixDownObtained = 17};
 
 // Helper Functions
 bool isPrime(const int a){
@@ -68,20 +70,30 @@ int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int
       damage = BASE_DAMAGE[event-1]*levelO*10;
       cout << " damage: " << damage << "    "; // DEBUG
       HP = HP - damage;
-
-      if (HP <= 0 && phoenixdown > 0){
-        HP = MAX_HEALTH;
-        phoenixdown--;
-      }
-      else if (HP <= 0 && phoenixdown == 0){
-        // DEAD: -1
-        return -1;
-      }
     }
     return 0;
   }
   // DRAW
   return 2;
+}
+
+bool isDead(int &HP){
+  if(HP <=0 )
+    return true;
+  return false;
+}
+
+bool combatBowser(const int MAX_HEALTH, int &level){
+  if (isKing(MAX_HEALTH)) 
+    return true;
+  
+  if (isLancelot(MAX_HEALTH) && level >= 8)
+    return true;
+
+  if (level == 10)
+    return true;
+
+  return false;
 }
 
 void tiny_morphed(bool &state,int &remaining, int &HP){
@@ -196,16 +208,10 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       int b = i%10;
       int levelO = (i>6) ? ((b>5)?b:5) : b;
       int victory = combat(level, levelO, event, MAX_HEALTH, HP, phoenixdown);
-      cout << "Mob's level : " << levelO << " "; // DEBUG
-      // IN CASE DEAD
-      if (victory == -1){
-        rescue = 0;
-        display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-        return;
-      }
+      cout << "Mob's lv : " << levelO << " "; // DEBUG
 
       // LOSE TO SHAMAN
-      else if (event == Shaman && victory == 0){
+      if (event == Shaman && victory == 0){
         tiny_morphed(tinyState, tinyRemain, HP);
         if(remedy){
           tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
@@ -224,12 +230,36 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         }
       }
     }
+    
+    // BOWSER FIGHT
+    else if (event == Bowser){
+      bool winBowser = combatBowser(MAX_HEALTH, level);
+      if (winBowser)
+        level = 10;
+      else{
+        rescue = 0;
+        display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+        return;
+      }
+    }
 
     /*--------------------- 
        THIS AREA IS MAINLY
           POST-COMBAT
     ----------------------*/
     postfight:
+      // ON DEATH
+      if (isDead(HP)){
+        if(phoenixdown){
+          phoenixdown--;
+          HP = MAX_HEALTH;
+        }
+        else{
+          rescue = 0;
+          display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+          return;
+        }
+      }
 
       display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
       i++;
