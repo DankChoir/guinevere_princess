@@ -12,8 +12,10 @@ void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int
       << ", rescue=" << rescue << endl;
 }
 
-// Global 
+// Global & Enums
 const float BASE_DAMAGE[5] = {1,1.5,4.5,7.5,9.5};
+
+enum SPECIAL_EVENTS { Shaman = 6, Vajsh = 7, RemedyObtained = 15, MaidenKissObtained = 16, PhoenixDownObtained = 17};
 
 bool isPrime(const int a){
   if (a<=1)
@@ -36,14 +38,14 @@ int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int
       level = (level +1 ) > 10 ? 10 : level +1;
     
     // BOSSES: Shaman and Vajsh
-    else if (event == 6 || event == 7)
+    else if (event == Shaman || event == Vajsh)
       level = (level +2 ) > 10 ? 10 : level +2;
     return 1;
   }
 
   // LOSE: 0
   if (level < levelO){
-    if(event != 6 && event != 7){
+    if(event != Shaman && event != Vajsh){
       int damage;
       damage = BASE_DAMAGE[event-1]*levelO*10;
       cout << " damage: " << damage << "    "; // DEBUG
@@ -138,21 +140,21 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
        THIS AREA IS MAINLY
             POTIONS EVENTS
     ----------------------*/
-    else if(event == 15){
+    else if(event == RemedyObtained){
       if(tinyState)
         tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
       else
         remedy = (remedy + 1 )> 99 ? 99 : remedy + 1 ;
     } // --> REMEDY
 
-    else if(event == 16){
+    else if(event == MaidenKissObtained){
       if(frogState)
         frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
       else
         maidenkiss = (maidenkiss + 1 )> 99 ? 99 : maidenkiss + 1 ;
     } // --> MAIDENKISS
 
-    else if(event == 17)
+    else if(event == PhoenixDownObtained)
       phoenixdown = (phoenixdown + 1 )> 99 ? 99 : phoenixdown + 1 ;
 
     /*--------------------- 
@@ -160,14 +162,11 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
             COMBAT
     ----------------------*/
 
-    // 1 -- 5 EVENTS !! maybe separating 6 7
+    // 1 -- 5 and 6 -- 7 EVENTS 
     else if (event >= 1 && event <=7){
       // SKIP
-      if (event == 6 || event ==7){
+      if (event == Shaman || event == Vajsh){
         if(tinyState || frogState) {
-          // display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-          // i++;
-          // continue; // ko co frogState tinyState m,ai sua
           goto postfight;
         }
       }
@@ -185,7 +184,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       }
 
       // LOSE TO SHAMAN
-      else if (event == 6 && victory == 0){
+      else if (event == Shaman && victory == 0){
         tiny_morphed(tinyState, tinyRemain, HP);
         if(remedy){
           tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
@@ -194,7 +193,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       }
 
       // LOSE TO Vajsh
-      else if (event == 7 && victory == 0){
+      else if (event == Vajsh && victory == 0){
         // SAVE LEVEL BEFORE FROG-ed
         levelBeforeFrog = level; 
         frog_morphed(frogState, frogRemain, level);
