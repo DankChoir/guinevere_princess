@@ -124,7 +124,12 @@ void frog_cleanse(bool &state, int &remaining, int&level, const int levelBeforeF
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue) {
   ifstream input_file(file_input);
   string line1, line2;
-  rescue = -1;
+  // line1 : Is Stat, line2 : is Events
+  getline(input_file, line1);
+  istringstream stats(line1);
+  stats >> HP >> level >> remedy >> maidenkiss >> phoenixdown;
+  getline(input_file, line2); 
+  istringstream events(line2);
 
   // TINY STATE
   bool tinyState = false;
@@ -135,15 +140,10 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   int  frogRemain = 0;
   int levelBeforeFrog;
 
-  // line1 : Is Stat, line2 : is Events
-  getline(input_file, line1);
-  istringstream stats(line1);
-  stats >> HP >> level >> remedy >> maidenkiss >> phoenixdown;
-  const int MAX_HEALTH = HP;
-  getline(input_file, line2); 
-  istringstream events(line2);
-
   // Journey starts
+  rescue = -1;
+  const int MAX_HEALTH = HP;
+
   int event;
   int i = 1;
   while(events >> event){
