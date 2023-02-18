@@ -13,7 +13,7 @@ void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int
 }
 
 // Global & Enums
-const float BASE_DAMAGE[5] = {1,1.5,4.5,7.5,9.5};
+const float BASE_DAMAGE[5] = {1,1.5,4.5,7.5,8.5};
 
 enum SPECIAL_EVENTS { Shaman = 6, Vajsh = 7, Bowser = 99,
                       MushMario = 11 , MushFibo = 12,
@@ -46,6 +46,7 @@ int prevFibo(const int a){
   int j = 1;
   int tempJ;
   while(j < a){
+    tempJ = j;
     j = i+j;
     i = tempJ;
   }
@@ -53,7 +54,7 @@ int prevFibo(const int a){
 }
 
 bool isKing(const int MAX_HEALTH){
-  return ((MAX_HEALTH == 999) ? true : false);
+  return (MAX_HEALTH == 999);
 }
 
 bool isLancelot(const int MAX_HEALTH){
@@ -158,51 +159,64 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   int event;
   int i = 1;
   while(events >> event){
-    cout << event << " ";
+    cout << event << " "; // DEBUG
+    switch (event) {
     
     /*------------------------ 
        THIS AREA IS MAINLY
             PRE-COMBAT & MISCS
     --------------------------*/
     // SUCCESSFUL
-    if (event == 0){
+    case 0:{
       rescue = 1;
       display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
       return;
     }
+    
     /*--------------------- 
        THIS AREA IS MAINLY
           MUSHROOMS EVENTS
     ----------------------*/
-    else if (event == MushMario){
+    case MushMario:{
       int n1 = ((level + phoenixdown)%5 + 1)*3;
       int s1 = n1*(100-n1);
 
       HP += s1%100; 
       int nextPrimeHP = nextPrime(HP);
       HP = (nextPrimeHP > MAX_HEALTH) ? MAX_HEALTH : nextPrimeHP;
-     } 
+      break;
+    }
+
+    case MushFibo:{
+      int fiboHP = prevFibo(HP);
+      HP = fiboHP > 1 ? fiboHP : 1;
+      break;
+    }
 
     /*--------------------- 
        THIS AREA IS MAINLY
             POTIONS EVENTS
     ----------------------*/
-    else if(event == RemedyObtained){
+    case RemedyObtained:{
       if(tinyState)
         tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
       else
         remedy = (remedy + 1 )> 99 ? 99 : remedy + 1 ;
+      break;
     } // --> REMEDY
 
-    else if(event == MaidenKissObtained){
+    case MaidenKissObtained:{
       if(frogState)
         frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
       else
         maidenkiss = (maidenkiss + 1 )> 99 ? 99 : maidenkiss + 1 ;
+      break;
     } // --> MAIDENKISS
 
-    else if(event == PhoenixDownObtained)
+    case PhoenixDownObtained:{
       phoenixdown = (phoenixdown + 1 )> 99 ? 99 : phoenixdown + 1 ;
+      break;
+    }
 
     /*--------------------- 
        THIS AREA IS MAINLY
@@ -210,11 +224,17 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     ----------------------*/
 
     // 1 -- 5 and 6 -- 7 EVENTS 
-    else if (event >= 1 && event <=7){
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case Shaman:
+    case Vajsh: {
       // SKIP
       if (event == Shaman || event == Vajsh){
         if(tinyState || frogState) {
-          goto postfight;
+          break;
         }
       }
       
@@ -243,10 +263,11 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
           maidenkiss--;
         }
       }
+      break;
     }
     
     // BOWSER FIGHT
-    else if (event == Bowser){
+    case Bowser:{
       bool winBowser = combatBowser(MAX_HEALTH, level);
       if (winBowser)
         level = 10;
@@ -255,42 +276,48 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
         return;
       }
+      break;
+    }
+
+    default:
+      goto skip;
     }
 
     /*--------------------- 
        THIS AREA IS MAINLY
           POST-COMBAT
     ----------------------*/
-    postfight:
-      // ON DEATH
-      if (isDead(HP)){
-        if(phoenixdown){
-          phoenixdown--;
-          HP = MAX_HEALTH;
-        }
-        else{
-          rescue = 0;
-          display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-          return;
-        }
+    // ON DEATH
+    if (isDead(HP)){
+      if(phoenixdown){
+        phoenixdown--;
+        HP = MAX_HEALTH;
       }
-
-      display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-      i++;
-
-      // Checking DE-BUFFs : Tiny & Frog State
-      if(tinyRemain)
-        tinyRemain--;
-      else if (tinyState && tinyRemain == 0){
-        tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
+      else{
+        rescue = 0;
+        display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+        return;
       }
+    }
 
-      if(frogRemain)
-        frogRemain--;
-      else if (frogState && frogRemain == 0){
-        frog_cleanse(tinyState, tinyRemain, level, levelBeforeFrog);
-      }
+    display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+    i++;
 
+    // Checking DE-BUFFs : Tiny & Frog State
+    if(tinyRemain)
+      tinyRemain--;
+    else if (tinyState && tinyRemain == 0){
+      tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
+    }
+
+    if(frogRemain)
+      frogRemain--;
+    else if (frogState && frogRemain == 0){
+      frog_cleanse(tinyState, tinyRemain, level, levelBeforeFrog);
+    }
+
+  skip:
+    continue;
   }
 
   // AT THIS STATE, NO MORE EVENTS
