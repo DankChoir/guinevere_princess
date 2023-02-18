@@ -16,7 +16,7 @@ void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int
 const float BASE_DAMAGE[5] = {1,1.5,4.5,7.5,9.5};
 
 enum SPECIAL_EVENTS { Shaman = 6, Vajsh = 7, Bowser = 99,
-                      MushMario = 11 ,
+                      MushMario = 11 , MushFibo = 12,
                       RemedyObtained = 15, MaidenKissObtained = 16, PhoenixDownObtained = 17};
 
 // Helper Functions
@@ -34,9 +34,20 @@ bool isPrime(const int a){
 }
 
 int nextPrime(const int a){
-  int i = (a%2==0) ? (a+1) : a;
+  int i = (a%2==0) ? (a+1) : (a+2);
   while(!isPrime(i)){
     i += 2;
+  }
+  return i;
+}
+
+int prevFibo(const int a){
+  int i = 1;
+  int j = 1;
+  int tempJ;
+  while(j < a){
+    j = i+j;
+    i = tempJ;
   }
   return i;
 }
