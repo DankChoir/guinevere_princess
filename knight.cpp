@@ -1,7 +1,4 @@
 #include "knight.h"
-#include <fstream>
-#include <sstream>
-
 
 void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int rescue) {
   cout << "HP=" << HP
@@ -59,6 +56,12 @@ bool isKing(const int MAX_HEALTH){
 
 bool isLancelot(const int MAX_HEALTH){
   return (isPrime(MAX_HEALTH)) ;
+}
+
+bool isMushGhost(const int eventCode){
+  string eventCode_str = to_string(eventCode);
+  string firstTwo = eventCode_str.substr(0,2);
+  return (firstTwo == "13");
 }
 
 int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int &phoenixdown){
@@ -280,7 +283,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     }
 
     default:
-      goto skip;
+      goto next;
     }
 
     /*--------------------- 
@@ -316,8 +319,8 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       frog_cleanse(tinyState, tinyRemain, level, levelBeforeFrog);
     }
 
-  skip:
-    continue;
+    next:
+      continue;
   }
 
   // AT THIS STATE, NO MORE EVENTS
