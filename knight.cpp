@@ -137,15 +137,23 @@ void frog_cleanse(bool &state, int &remaining, int&level, const int levelBeforeF
 
 // MAIN ADVENTURE FUNCTION
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue) {
-  ifstream input_file(file_input);
-  string line1, line2;
-  // line1 : Is Stat, line2 : is Events
-  getline(input_file, line1);
-  istringstream stats(line1);
-  stats >> HP >> level >> remedy >> maidenkiss >> phoenixdown;
-  getline(input_file, line2); 
-  istringstream events(line2);
+  string mushGhost, asclepiusPack, merlinPack;
 
+  ifstream input_file(file_input);
+  string line1, line2, line3;
+  
+  getline(input_file, line1);
+  getline(input_file, line2); 
+  getline(input_file, line3); 
+
+  istringstream stats(line1);
+  istringstream events(line2);
+  istringstream fileNames(line3);
+  stats >> HP >> level >> remedy >> maidenkiss >> phoenixdown;
+
+  getline(fileNames, mushGhost, ',');
+  getline(fileNames, asclepiusPack, ',');
+  fileNames >> merlinPack;
   // TINY STATE
   bool tinyState = false;
   int tinyRemain = 0;
@@ -161,6 +169,8 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
   int event;
   int i = 1;
+    
+  cout << asclepiusPack << mushGhost << merlinPack;
   while(events >> event){
     cout << event << " "; // DEBUG
     switch (event) {
