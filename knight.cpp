@@ -1,4 +1,6 @@
 #include "knight.h"
+#include <fstream>
+#include <string>
 
 void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int rescue) {
   cout << "HP=" << HP
@@ -83,7 +85,6 @@ int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int
     if(event != Shaman && event != Vajsh){
       int damage;
       damage = BASE_DAMAGE[event-1]*levelO*10;
-      cout << " damage: " << damage << "    "; // DEBUG
       HP = HP - damage;
     }
     return 0;
@@ -172,7 +173,47 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     
   cout << asclepiusPack << mushGhost << merlinPack;
   while(events >> event){
-    cout << event << " "; // DEBUG
+    /*--------------------------
+       THIS AREA IS PARTICULARLY 
+          JUST for MUSH GHOST
+    ----------------------------*/
+    if(isMushGhost(event)){
+      ifstream ghostfFile(mushGhost);
+      string dong;
+
+      getline(ghostfFile,dong);
+      int amount = stoi(dong);
+      int *nums = new int[amount];
+
+      /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       * READ NUMBERS FROM mushGhostFile
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+      getline(ghostfFile,dong);
+      istringstream numbers_file(dong);
+
+      for (int i = 0; i < amount; i++) {
+        string num_str;
+        getline(numbers_file, num_str, ',');
+        int num = stoi(num_str);
+        nums[i] = num;
+      }
+      
+      /*~~~~~~~~~~~~~~~~~~~~~~
+       * MAIN MushGhost EVENTS
+       ~~~~~~~~~~~~~~~~~~~~~~~*/
+      string mushGhostEvents = to_string(event);
+      for(int i = 2; i < mushGhostEvents.length();i++){
+        cout << mushGhostEvents[i] << endl;
+      }
+
+      /*~~~~~~~~~~~~
+       * POST EVENTS
+       ~~~~~~~~~~~~~*/
+      delete[] nums;
+      ghostfFile.close();
+      goto next;
+    }
+
     switch (event) {
     
     /*------------------------ 
@@ -255,7 +296,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       int b = i%10;
       int levelO = (i>6) ? ((b>5)?b:5) : b;
       int victory = combat(level, levelO, event, MAX_HEALTH, HP, phoenixdown);
-      cout << "Mob's lv : " << levelO << " "; // DEBUG
 
       // LOSE TO SHAMAN
       if (event == Shaman && victory == 0){
