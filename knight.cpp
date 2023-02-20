@@ -1,5 +1,6 @@
 #include "knight.h"
 #include <fstream>
+#include <sstream>
 #include <string>
 
 void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int rescue) {
@@ -12,11 +13,12 @@ void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int
 }
 
 // Global & Enums
-const float BASE_DAMAGE[5] = {1,1.5,4.5,7.5,8.5};
+const float BASE_DAMAGE[5] = {1,1.5,4.5,7.5,9.5};
 
 enum SPECIAL_EVENTS { Shaman = 6, Vajsh = 7, Bowser = 99,
                       MushMario = 11 , MushFibo = 12,
-                      RemedyObtained = 15, MaidenKissObtained = 16, PhoenixDownObtained = 17};
+                      RemedyObtained = 15, MaidenKissObtained = 16, PhoenixDownObtained = 17,
+                      Merlin = 18, Asclepius = 19};
 
 // Helper Functions
 bool isPrime(const int a){
@@ -182,6 +184,62 @@ void mushTypeTwo(int &HP, int* arr, int n){
   return;
 }
 
+void mushTypeThree(int &HP, int* arr, int n){
+  int maxi = 0, mini = 0;
+  int *arr2 = new int[n];
+  for(int i = 0; i <n; i++){
+    if(arr[i]<0)
+        arr[i] = -arr[i];
+    arr2[i] = (17*arr2[i]+9)%257;  
+  }
+
+  for(int i = 0; i <n; i++){
+    int value = arr2[i];
+    maxi = (value > arr2[maxi]) ? i : maxi;
+    mini = (value < arr2[mini]) ? i : mini;
+  }
+  delete [] arr2;
+  HP = (HP - (maxi+mini)) > 999 ? 999 : (HP - (maxi+mini));
+}
+
+void mushTypeFour(int &HP, int* arr, int n) {
+  int max2_3x = -5;
+  int max2_3i = -7;
+  
+  int *arr2 = new int[n];
+  for(int i = 0; i <n; i++){
+    if(arr[i]<0)
+        arr2[i] = -arr[i];
+    arr2[i] = (17*arr2[i]+9)%257;  
+  }
+
+  if (n >= 3) {
+    int max1 = arr2[0];
+    int max2 = -2147483647;
+    int max1i = 0;
+    int max2i = -1;
+
+    for (int i = 1; i < 3; i++) {
+        if (arr2[i] > max1) {
+            max2 = max1;
+            max2i = max1i;
+            max1 = arr2[i];
+            max1i = i;
+        } else if (arr2[i] > max2) {
+            max2 = arr2[i];
+            max2i = i;
+        }
+    }
+
+    if (max2i != -1) {
+        max2_3x = arr2[max2i];
+        max2_3i = max2i;
+    }
+  }
+  delete [] arr2;
+  HP = (HP - (max2_3x+max2_3i)) > 999 ? 999 : (HP - (max2_3x+max2_3i));
+}
+
 // MAIN ADVENTURE FUNCTION
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue) {
   string mushGhost, asclepiusPack, merlinPack;
@@ -210,6 +268,10 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   int  frogRemain = 0;
   int levelBeforeFrog;
 
+  // Asclepius and Merlin encounterd
+  bool metAsclepius = false;
+  bool mMtmerlin = false;
+
   // Journey starts
   rescue = -1;
   const int MAX_HEALTH = HP;
@@ -217,7 +279,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   int event;
   int i = 1;
     
-  cout << asclepiusPack << mushGhost << merlinPack;
   while(events >> event){
     /*--------------------------
        THIS AREA IS PARTICULARLY 
@@ -242,6 +303,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         getline(numbers_file, num_str, ',');
         int num = stoi(num_str);
         nums[i] = num;
+        cout << num << " n " << endl; //DEBUG
       }
       
       /*~~~~~~~~~~~~~~~~~~~~~~
@@ -255,17 +317,36 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         switch(eventCode){
           case '1':{
             mushTypeOne(HP, nums, amount);
-            display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
             break;
           }
           case '2':{
             mushTypeTwo(HP, nums, amount);
-            display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+            break;
+          }
+          case '3':{
+            mushTypeThree(HP, nums, amount);
+            break;
+          }
+          case '4':{
+            mushTypeFour(HP, nums, amount);
             break;
           }
           default:
             cout << endl;
         }
+
+        if (isDead(HP)){
+          if(phoenixdown){
+            phoenixdown--;
+            HP = MAX_HEALTH;
+          }
+          else{
+            rescue = 0;
+            display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+            return;
+          }
+        }
+        display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
       }
 
       /*~~~~~~~~~~~~
@@ -317,7 +398,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       if(tinyState)
         tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
       else
-        remedy = (remedy + 1 )> 99 ? 99 : remedy + 1 ;
+        remedy++;
       break;
     } // --> REMEDY
 
@@ -325,12 +406,12 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       if(frogState)
         frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
       else
-        maidenkiss = (maidenkiss + 1 )> 99 ? 99 : maidenkiss + 1 ;
+        maidenkiss++; 
       break;
     } // --> MAIDENKISS
 
     case PhoenixDownObtained:{
-      phoenixdown = (phoenixdown + 1 )> 99 ? 99 : phoenixdown + 1 ;
+      phoenixdown++;
       break;
     }
 
@@ -338,7 +419,41 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
        THIS AREA IS MAINLY
             COMBAT
     ----------------------*/
+    case Asclepius:{
+      ifstream potion_file(asclepiusPack);
+      string poitionLine;
+      int r1, c1;
+      getline(potion_file,poitionLine);
+      r1 = stoi(poitionLine);
+      getline(potion_file,poitionLine);
+      c1 = stoi(poitionLine);
 
+      for(int r=0; r <r1; r++){
+        int limit = 0;
+        getline(potion_file,poitionLine);
+        istringstream potions(poitionLine);
+        int potion;
+        for(int c=0; c <c1; c++){
+          potions >> potion;
+          if (limit == 3)
+            break;
+          if (potion == 16){
+            remedy++;
+            limit++;
+          }
+          else if (potion == 17){
+            maidenkiss++;
+            limit++;
+          }
+          else if (potion == 18){
+            phoenixdown++;
+            limit++;
+          }
+        }
+      }
+      potion_file.close();
+      break;
+    }
     // 1 -- 5 and 6 -- 7 EVENTS 
     case 1:
     case 2:
@@ -362,10 +477,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       // LOSE TO SHAMAN
       if (event == Shaman && victory == 0){
         tiny_morphed(tinyState, tinyRemain, HP);
-        if(remedy){
-          tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
-          remedy--;
-        }
       }
 
       // LOSE TO Vajsh
@@ -373,10 +484,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         // SAVE LEVEL BEFORE FROG-ed
         levelBeforeFrog = level; 
         frog_morphed(frogState, frogRemain, level);
-        if(maidenkiss){
-          frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
-          maidenkiss--;
-        }
       }
       break;
     }
@@ -415,21 +522,38 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       }
     }
 
-    display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-    i++;
-
     // Checking DE-BUFFs : Tiny & Frog State
-    if(tinyRemain)
-      tinyRemain--;
+    if(tinyRemain){
+      if(remedy){
+        tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
+        remedy--;
+      }
+      else
+        tinyRemain--;
+    }
     else if (tinyState && tinyRemain == 0){
       tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
     }
 
-    if(frogRemain)
-      frogRemain--;
+    if(frogRemain){
+      if(maidenkiss){
+        frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
+        maidenkiss--;
+      }
+      else
+        frogRemain--;
+    }
     else if (frogState && frogRemain == 0){
       frog_cleanse(tinyState, tinyRemain, level, levelBeforeFrog);
     }
+
+    // Checking POTIONS
+    remedy = remedy > 99 ? 99 : remedy;
+    maidenkiss = maidenkiss > 99 ? 99 : maidenkiss;
+    phoenixdown = phoenixdown > 99 ? 99 : phoenixdown;
+
+    display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+    i++;
 
     next:
       continue;
@@ -437,7 +561,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
   // AT THIS STATE, NO MORE EVENTS
   rescue = 1;
-  display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+  // display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
 
   input_file.close();
 }
