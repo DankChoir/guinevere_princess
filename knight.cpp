@@ -136,6 +136,52 @@ void frog_cleanse(bool &state, int &remaining, int&level, const int levelBeforeF
   level = levelBeforeFrog;
 }
 
+void mushTypeOne(int &HP, int* arr, int n){
+  int maxi = 0, mini = 0;
+  for(int i = 0; i <n; i++){
+    int value = arr[i];
+    // use =, as we need the last pos   
+    maxi = (value >= arr[maxi]) ? i : maxi;
+    mini = (value <= arr[mini]) ? i : mini;
+  }
+  HP = HP - (maxi+mini);
+}
+
+void mushTypeTwo(int &HP, int* arr, int n){
+  int mtx , mti ;
+  bool descended = false;
+
+  for(int i =1; i < n; i++){
+    bool ascending = arr[i] > arr[i-1];
+    
+     // HAVE NOT ON DOWN HILL yet
+    if (!descended){
+      if (!ascending) {
+        mti = i-1;
+        mtx = arr[i-1];
+        descended = (arr[i] < arr[i-1]) ? true : false;
+      }
+    }
+        
+    // EITHER (uphill + not yet descended) or (downhill + descended)    
+    if(!(ascending^descended)){ 
+      mti = -3;
+      mtx = -2;
+      HP = (HP - (mtx + mti)) > 999 ? 999 : HP - (mtx + mti) ;
+      return;
+    }
+  }
+  // STILL, can be a ramp instead of a moutain
+  if(!descended){
+    mti = -3;
+    mtx = -2;
+    HP = (HP - (mtx + mti)) > 999 ? 999 : HP - (mtx + mti) ;
+    return;
+  }
+  HP = (HP - (mtx + mti)) > 999 ? 999 : HP - (mtx + mti) ;
+  return;
+}
+
 // MAIN ADVENTURE FUNCTION
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue) {
   string mushGhost, asclepiusPack, merlinPack;
@@ -203,7 +249,23 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
        ~~~~~~~~~~~~~~~~~~~~~~~*/
       string mushGhostEvents = to_string(event);
       for(int i = 2; i < mushGhostEvents.length();i++){
-        cout << mushGhostEvents[i] << endl;
+        char eventCode = mushGhostEvents[i];
+        cout << eventCode;
+
+        switch(eventCode){
+          case '1':{
+            mushTypeOne(HP, nums, amount);
+            display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+            break;
+          }
+          case '2':{
+            mushTypeTwo(HP, nums, amount);
+            display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+            break;
+          }
+          default:
+            cout << endl;
+        }
       }
 
       /*~~~~~~~~~~~~
