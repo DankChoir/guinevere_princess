@@ -68,6 +68,29 @@ bool isMushGhost(const int eventCode){
   return (firstTwo == "13");
 }
 
+bool hasAllMerlinLetters(string itemName) {
+    const string merlinName = "merlin";
+    int foundCount[6] = { 0 };
+
+    for (char c : itemName) {
+        for (int i = 0; i < 6; i++) {
+            if (tolower(c) == tolower(merlinName[i])) {
+                foundCount[i]++;
+                break;
+            }
+        }
+    }
+
+    for (int i = 0; i < 6; i++) {
+        if (foundCount[i] == 0) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+//COMBAT-WISE
 int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int &phoenixdown){
 
   // WIN: 1
@@ -95,12 +118,6 @@ int combat(int &level,int &levelO,int &event, const int MAX_HEALTH ,int &HP, int
   return 2;
 }
 
-bool isDead(int &HP){
-  if(HP <=0 )
-    return true;
-  return false;
-}
-
 bool combatBowser(const int MAX_HEALTH, int &level){
   if (isKing(MAX_HEALTH)) 
     return true;
@@ -111,6 +128,13 @@ bool combatBowser(const int MAX_HEALTH, int &level){
   if (level == 10)
     return true;
 
+  return false;
+}
+
+// STATE CHECK
+bool isDead(int &HP){
+  if(HP <=0 )
+    return true;
   return false;
 }
 
@@ -270,7 +294,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
   // Asclepius and Merlin encounterd
   bool metAsclepius = false;
-  bool mMtmerlin = false;
+  bool metMerlin = false;
 
   // Journey starts
   rescue = -1;
@@ -420,9 +444,14 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
             COMBAT
     ----------------------*/
     case Asclepius:{
+      if(metAsclepius)
+        break; // display()?
+
       ifstream potion_file(asclepiusPack);
       string poitionLine;
       int r1, c1;
+
+      // GET ROW AND COLUMN
       getline(potion_file,poitionLine);
       r1 = stoi(poitionLine);
       getline(potion_file,poitionLine);
@@ -451,6 +480,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
           }
         }
       }
+      metAsclepius = true;
       potion_file.close();
       break;
     }
