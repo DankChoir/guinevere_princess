@@ -69,25 +69,25 @@ bool isMushGhost(const int eventCode){
 }
 
 bool hasAllMerlinLetters(string itemName) {
-    const string merlinName = "merlin";
-    int foundCount[6] = { 0 };
+  const string merlinName = "merlin";
+  int foundCount[6] = { 0 };
 
-    for (char c : itemName) {
-        for (int i = 0; i < 6; i++) {
-            if (tolower(c) == tolower(merlinName[i])) {
-                foundCount[i]++;
-                break;
-            }
-        }
-    }
-
+  for (char c : itemName) {
     for (int i = 0; i < 6; i++) {
-        if (foundCount[i] == 0) {
-            return false;
-        }
+      if (tolower(c) == tolower(merlinName[i])) {
+        foundCount[i]++;
+        break;
+      }
     }
+  }
 
-    return true;
+  for (int i = 0; i < 6; i++) {
+    if (foundCount[i] == 0) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 //COMBAT-WISE
@@ -213,7 +213,7 @@ void mushTypeThree(int &HP, int* arr, int n){
   int *arr2 = new int[n];
   for(int i = 0; i <n; i++){
     if(arr[i]<0)
-        arr[i] = -arr[i];
+        arr2[i] = -arr[i];
     arr2[i] = (17*arr2[i]+9)%257;  
   }
 
@@ -297,12 +297,18 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   bool metMerlin = false;
 
   // Journey starts
+  int events_nums = 0;
+  for(int i =0; line2[i] != '\0'; i++){
+    if (line2[i] == ' ')
+      events_nums++;
+  }
+  if (events_nums) events_nums++;
+
   rescue = -1;
   const int MAX_HEALTH = HP;
-
   int event;
   int i = 1;
-    
+
   while(events >> event){
     /*--------------------------
        THIS AREA IS PARTICULARLY 
@@ -327,7 +333,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         getline(numbers_file, num_str, ',');
         int num = stoi(num_str);
         nums[i] = num;
-        cout << num << " n " << endl; //DEBUG
+        // cout << num << " n " << endl; //DEBUG
       }
       
       /*~~~~~~~~~~~~~~~~~~~~~~
@@ -336,22 +342,26 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       string mushGhostEvents = to_string(event);
       for(int i = 2; i < mushGhostEvents.length();i++){
         char eventCode = mushGhostEvents[i];
-        cout << eventCode;
+        // cout << eventCode;
 
         switch(eventCode){
           case '1':{
+            cout << 1;
             mushTypeOne(HP, nums, amount);
             break;
           }
           case '2':{
+            cout << 2;
             mushTypeTwo(HP, nums, amount);
             break;
           }
           case '3':{
+            cout << 3;
             mushTypeThree(HP, nums, amount);
             break;
           }
           case '4':{
+            cout << 4;
             mushTypeFour(HP, nums, amount);
             break;
           }
@@ -378,6 +388,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
        ~~~~~~~~~~~~~*/
       delete[] nums;
       ghostfFile.close();
+      i++;
       goto next;
     }
 
@@ -443,6 +454,36 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
        THIS AREA IS MAINLY
             COMBAT
     ----------------------*/
+    case Merlin:{ 
+      cout << "Health before Merlin: " << HP << endl;
+      if(metMerlin)
+        break;
+
+      ifstream enchanted_file(merlinPack);
+      string itemName;
+      getline(enchanted_file,itemName);
+      int n9 = stoi(itemName);
+
+      for(int i =0; i < n9;i++){
+        getline(enchanted_file,itemName);
+        cout << "Items: " << itemName;
+        if (hasAllMerlinLetters(itemName)){
+          if (itemName.find("Merlin") != string::npos || itemName.find("merlin") != string::npos) {
+            HP += 3;
+            cout << " +3 HP " << endl;
+          }
+          else{
+            HP += 2;
+            cout << " +2 HP " << endl;
+          }
+        }
+        cout <<endl;
+      }
+
+      metMerlin = true;
+      enchanted_file.close();
+      break;
+    }
     case Asclepius:{
       if(metAsclepius)
         break; // display()?
@@ -582,16 +623,17 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     maidenkiss = maidenkiss > 99 ? 99 : maidenkiss;
     phoenixdown = phoenixdown > 99 ? 99 : phoenixdown;
 
-    display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+    if (i == events_nums){
+      rescue = 1;
+      display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+      return;
+    }
+
     i++;
+    display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
 
     next:
       continue;
   }
-
-  // AT THIS STATE, NO MORE EVENTS
-  rescue = 1;
-  // display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-
   input_file.close();
 }
