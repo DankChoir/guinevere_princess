@@ -291,7 +291,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
   // Journey starts
   int events_nums = 0;
-  int event_index = 1;
+  int event_index = 0;
 
   rescue = -1;
   const int MAX_HEALTH = HP;
@@ -467,7 +467,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
       for(int i =0; i < n9;i++){
         getline(enchanted_file,itemName);
-        cout << "Items: " << itemName;
+        cout << "Items: " << itemName ;
         if (hasAllMerlinLetters(itemName)){
           if (itemName.find("Merlin") != string::npos || itemName.find("merlin") != string::npos) {
             HP += 3;
