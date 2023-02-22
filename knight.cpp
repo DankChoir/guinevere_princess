@@ -1,4 +1,5 @@
 #include "knight.h"
+#include <cstdio>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -22,36 +23,27 @@ enum SPECIAL_EVENTS { Shaman = 6, Vajsh = 7, Bowser = 99,
 
 // Helper Functions
 bool isPrime(const int a){
-  if (a<=1)
-    return false;
-  if (a==2)
-    return true;
+  if (a<=1) return false;
+  if (a==2) return true;
 
   for(int i=2; i*i <= a; i++){
-    if(a%i==0)
-      return false;
-  }
-  return true;
+    if(a%i==0) return false;
+  } return true;
 }
 
 int nextPrime(const int a){
   int i = (a%2==0) ? (a+1) : (a+2);
-  while(!isPrime(i)){
-    i += 2;
-  }
+  while(!isPrime(i)){i += 2;}
   return i;
 }
 
 int prevFibo(const int a){
-  int i = 1;
-  int j = 1;
-  int tempJ;
+  int tempJ, i = 1, j=1;
   while(j < a){
     tempJ = j;
     j = i+j;
     i = tempJ;
-  }
-  return i;
+  } return i;
 }
 
 bool isKing(const int MAX_HEALTH){
@@ -147,7 +139,7 @@ void tiny_morphed(bool &state,int &remaining, int &HP){
 void tiny_cleanse(bool &state,int &remaining, int &HP, const int MAX_HEALTH){
   state = false;
   remaining = 0;
-  HP = HP*5 > MAX_HEALTH ? MAX_HEALTH : HP*5;
+  HP *= 5;
 }
 
 void frog_morphed(bool &state,int &remaining, int &level){
@@ -170,7 +162,7 @@ void mushTypeOne(int &HP, int* arr, int n){
     maxi = (value >= arr[maxi]) ? i : maxi;
     mini = (value <= arr[mini]) ? i : mini;
   }
-  HP = HP - (maxi+mini);
+  HP -= (maxi+mini);
 }
 
 void mushTypeTwo(int &HP, int* arr, int n){
@@ -193,7 +185,7 @@ void mushTypeTwo(int &HP, int* arr, int n){
     if(!(ascending^descended)){ 
       mti = -3;
       mtx = -2;
-      HP = (HP - (mtx + mti)) > 999 ? 999 : HP - (mtx + mti) ;
+      HP -= (mtx + mti) ;
       return;
     }
   }
@@ -201,10 +193,10 @@ void mushTypeTwo(int &HP, int* arr, int n){
   if(!descended){
     mti = -3;
     mtx = -2;
-    HP = (HP - (mtx + mti)) > 999 ? 999 : HP - (mtx + mti) ;
+    HP -= (mtx + mti) ;
     return;
   }
-  HP = (HP - (mtx + mti)) > 999 ? 999 : HP - (mtx + mti) ;
+  HP -= (mtx + mti) ;
   return;
 }
 
@@ -212,8 +204,8 @@ void mushTypeThree(int &HP, int* arr, int n){
   int maxi = 0, mini = 0;
   int *arr2 = new int[n];
   for(int i = 0; i <n; i++){
-    if(arr[i]<0)
-        arr2[i] = -arr[i];
+    arr2[i] = arr[i];
+    arr2[i] = arr2[i] < 0 ? (-arr2[i]) : arr2[i];
     arr2[i] = (17*arr2[i]+9)%257;  
   }
 
@@ -223,7 +215,7 @@ void mushTypeThree(int &HP, int* arr, int n){
     mini = (value < arr2[mini]) ? i : mini;
   }
   delete [] arr2;
-  HP = (HP - (maxi+mini)) > 999 ? 999 : (HP - (maxi+mini));
+  HP -= (maxi+mini);
 }
 
 void mushTypeFour(int &HP, int* arr, int n) {
@@ -232,9 +224,10 @@ void mushTypeFour(int &HP, int* arr, int n) {
   
   int *arr2 = new int[n];
   for(int i = 0; i <n; i++){
-    if(arr[i]<0)
-        arr2[i] = -arr[i];
+    arr2[i] = arr[i];
+    arr2[i] = arr2[i] < 0 ? (-arr2[i]) : arr2[i];
     arr2[i] = (17*arr2[i]+9)%257;  
+    cout << " |" << arr2[i] << "  ";
   }
 
   if (n >= 3) {
@@ -261,7 +254,7 @@ void mushTypeFour(int &HP, int* arr, int n) {
     }
   }
   delete [] arr2;
-  HP = (HP - (max2_3x+max2_3i)) > 999 ? 999 : (HP - (max2_3x+max2_3i));
+  HP -= (max2_3x+max2_3i);
 }
 
 // MAIN ADVENTURE FUNCTION
@@ -298,18 +291,24 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
   // Journey starts
   int events_nums = 0;
-  for(int i =0; line2[i] != '\0'; i++){
-    if (line2[i] == ' ')
-      events_nums++;
-  }
-  if (events_nums) events_nums++;
+  int event_index = 1;
 
   rescue = -1;
   const int MAX_HEALTH = HP;
   int event;
   int i = 1;
 
+  while (events >> event) {
+    events_nums++;
+  }
+
+  // reset the stream to the beginning
+  events.clear();
+  events.seekg(0, std::ios::beg);
+  // cout << "Number of events: " << events_nums << endl; // DEBUG
+
   while(events >> event){
+    event_index++;
     /*--------------------------
        THIS AREA IS PARTICULARLY 
           JUST for MUSH GHOST
@@ -327,13 +326,15 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
       getline(ghostfFile,dong);
       istringstream numbers_file(dong);
-
+      
+      int num;
       for (int i = 0; i < amount; i++) {
         string num_str;
         getline(numbers_file, num_str, ',');
-        int num = stoi(num_str);
+
+        num = stoi(num_str); // DDDDDDDDDDDDDD
         nums[i] = num;
-        // cout << num << " n " << endl; //DEBUG
+        cout << num << " n " << endl; //DEBUG
       }
       
       /*~~~~~~~~~~~~~~~~~~~~~~
@@ -415,7 +416,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
       HP += s1%100; 
       int nextPrimeHP = nextPrime(HP);
-      HP = (nextPrimeHP > MAX_HEALTH) ? MAX_HEALTH : nextPrimeHP;
+      HP = nextPrimeHP;
       break;
     }
 
@@ -573,6 +574,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     }
 
     default:
+      // i++; //NOT SURE
       goto next;
     }
 
@@ -623,15 +625,20 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     maidenkiss = maidenkiss > 99 ? 99 : maidenkiss;
     phoenixdown = phoenixdown > 99 ? 99 : phoenixdown;
 
-    if (i == events_nums){
+    // Checking HEALTH
+    HP = HP > MAX_HEALTH ? MAX_HEALTH : HP;
+
+    if (event_index == events_nums){
       rescue = 1;
       display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
       return;
     }
-
+    
+    // CLI 
     i++;
     display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-
+    
+    // SKIP EVENT
     next:
       continue;
   }
