@@ -285,7 +285,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   int  frogRemain = 0;
   int levelBeforeFrog;
 
-  // Asclepius and Merlin encounterd
+  // Asclepius and Merlin encountered
   bool metAsclepius = false;
   bool metMerlin = false;
 
@@ -308,6 +308,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   // cout << "Number of events: " << events_nums << endl; // DEBUG
 
   while(events >> event){
+    bool skip = false;
     event_index++;
     /*--------------------------
        THIS AREA IS PARTICULARLY 
@@ -390,7 +391,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       delete[] nums;
       ghostfFile.close();
       i++;
-      goto next;
+      continue;
     }
 
     switch (event) {
@@ -456,7 +457,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
             COMBAT
     ----------------------*/
     case Merlin:{ 
-      cout << "Health before Merlin: " << HP << endl;
       if(metMerlin)
         break;
 
@@ -467,18 +467,14 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
       for(int i =0; i < n9;i++){
         getline(enchanted_file,itemName);
-        cout << "Items: " << itemName ;
         if (hasAllMerlinLetters(itemName)){
           if (itemName.find("Merlin") != string::npos || itemName.find("merlin") != string::npos) {
             HP += 3;
-            cout << " +3 HP " << endl;
           }
           else{
             HP += 2;
-            cout << " +2 HP " << endl;
           }
         }
-        cout <<endl;
       }
 
       metMerlin = true;
@@ -563,19 +559,19 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     // BOWSER FIGHT
     case Bowser:{
       bool winBowser = combatBowser(MAX_HEALTH, level);
-      if (winBowser)
-        level = 10;
-      else{
+      if (!winBowser){
         rescue = 0;
         display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
         return;
       }
+      level = 10;
       break;
     }
 
-    default:
-      // i++; //NOT SURE
-      goto next;
+    default:{
+      skip = true;
+      break;
+      }
     }
 
     /*--------------------- 
@@ -636,11 +632,9 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     
     // CLI 
     i++;
-    display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+    if(!skip)
+      display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
     
-    // SKIP EVENT
-    next:
-      continue;
   }
   input_file.close();
 }
