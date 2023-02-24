@@ -189,10 +189,10 @@ void mushTypeTwo(int &HP, int* arr, int n){
       return;
     }
   }
-  // STILL, can be a ramp instead of a moutain
+  // STILL, can be a ramp moutain
   if(!descended){
-    mti = -3;
-    mtx = -2;
+    mti = n-1;
+    mtx = arr[n-1];
     HP -= (mtx + mti) ;
     return;
   }
@@ -227,7 +227,7 @@ void mushTypeFour(int &HP, int* arr, int n) {
     arr2[i] = arr[i];
     arr2[i] = arr2[i] < 0 ? (-arr2[i]) : arr2[i];
     arr2[i] = (17*arr2[i]+9)%257;  
-    cout << " |" << arr2[i] << "  ";
+    // cout << " |" << arr2[i] << "  ";
   }
 
   if (n >= 3) {
@@ -305,7 +305,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   // reset the stream to the beginning
   events.clear();
   events.seekg(0, std::ios::beg);
-  // cout << "Number of events: " << events_nums << endl; // DEBUG
 
   while(events >> event){
     bool skip = false;
@@ -333,9 +332,8 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         string num_str;
         getline(numbers_file, num_str, ',');
 
-        num = stoi(num_str); // DDDDDDDDDDDDDD
+        num = stoi(num_str);
         nums[i] = num;
-        cout << num << " n " << endl; //DEBUG
       }
       
       /*~~~~~~~~~~~~~~~~~~~~~~
@@ -348,22 +346,18 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
         switch(eventCode){
           case '1':{
-            cout << 1;
             mushTypeOne(HP, nums, amount);
             break;
           }
           case '2':{
-            cout << 2;
             mushTypeTwo(HP, nums, amount);
             break;
           }
           case '3':{
-            cout << 3;
             mushTypeThree(HP, nums, amount);
             break;
           }
           case '4':{
-            cout << 4;
             mushTypeFour(HP, nums, amount);
             break;
           }
@@ -382,9 +376,9 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
             return;
           }
         }
-        display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
       }
 
+      display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
       /*~~~~~~~~~~~~
        * POST EVENTS
        ~~~~~~~~~~~~~*/
