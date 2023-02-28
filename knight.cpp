@@ -1,8 +1,4 @@
 #include "knight.h"
-#include <cstdio>
-#include <fstream>
-#include <sstream>
-#include <string>
 
 void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int rescue) {
   cout << "HP=" << HP
