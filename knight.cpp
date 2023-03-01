@@ -303,7 +303,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   events.seekg(0, std::ios::beg);
 
   while(events >> event){
-    bool skip = false;
     event_index++;
     /*--------------------------
        THIS AREA IS PARTICULARLY 
@@ -338,7 +337,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       string mushGhostEvents = to_string(event);
       for(int i = 2; i < mushGhostEvents.length();i++){
         char eventCode = mushGhostEvents[i];
-        // cout << eventCode;
 
         switch(eventCode){
           case '1':{
@@ -473,7 +471,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     }
     case Asclepius:{
       if(metAsclepius)
-        break; // display()?
+        break; // display() yes
 
       ifstream potion_file(asclepiusPack);
       string poitionLine;
@@ -558,10 +556,8 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       break;
     }
 
-    default:{
-      skip = true;
+    default:
       break;
-      }
     }
 
     /*--------------------- 
@@ -622,8 +618,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     
     // CLI 
     i++;
-    if(!skip)
-      display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+    display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
     
   }
   input_file.close();
