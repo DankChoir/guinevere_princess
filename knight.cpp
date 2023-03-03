@@ -316,9 +316,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       int amount = stoi(dong);
       int *nums = new int[amount];
 
-      /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-       * READ NUMBERS FROM mushGhostFile
-       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
       getline(ghostfFile,dong);
       istringstream numbers_file(dong);
       
@@ -326,7 +323,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       for (int i = 0; i < amount; i++) {
         string num_str;
         getline(numbers_file, num_str, ',');
-
         num = stoi(num_str);
         nums[i] = num;
       }
@@ -362,6 +358,8 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         if (isDead(HP)){
           if(phoenixdown){
             phoenixdown--;
+            frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
+            tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
             HP = MAX_HEALTH;
           }
           else{
@@ -373,9 +371,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
       }
 
       display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-      /*~~~~~~~~~~~~
-       * POST EVENTS
-       ~~~~~~~~~~~~~*/
       delete[] nums;
       ghostfFile.close();
       i++;
@@ -568,6 +563,8 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     if (isDead(HP)){
       if(phoenixdown){
         phoenixdown--;
+        frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
+        tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
         HP = MAX_HEALTH;
       }
       else{
