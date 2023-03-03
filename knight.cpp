@@ -223,7 +223,6 @@ void mushTypeFour(int &HP, int* arr, int n) {
     arr2[i] = arr[i];
     arr2[i] = arr2[i] < 0 ? (-arr2[i]) : arr2[i];
     arr2[i] = (17*arr2[i]+9)%257;  
-    // cout << " |" << arr2[i] << "  ";
   }
 
   if (n >= 3) {
