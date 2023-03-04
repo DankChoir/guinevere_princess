@@ -129,7 +129,7 @@ bool isDead(int &HP){
 void tiny_morphed(bool &state,int &remaining, int &HP){
   state = true;
   remaining = 3;
-  HP = (HP/5 )< 5 ? 1 : HP/5;
+  HP = (HP< 5 ) ? 1 : HP/5;
 }
 
 void tiny_cleanse(bool &state,int &remaining, int &HP, const int MAX_HEALTH){
@@ -526,14 +526,16 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
       // LOSE TO SHAMAN
       if (event == Shaman && victory == 0){
-        tiny_morphed(tinyState, tinyRemain, HP);
+        if(remedy) remedy--;
+        else tiny_morphed(tinyState, tinyRemain, HP);
       }
 
       // LOSE TO Vajsh
       else if (event == Vajsh && victory == 0){
         // SAVE LEVEL BEFORE FROG-ed
-        levelBeforeFrog = level; 
-        frog_morphed(frogState, frogRemain, level);
+        levelBeforeFrog = level;
+        if(maidenkiss) maidenkiss --;
+        else frog_morphed(frogState, frogRemain, level);
       }
       break;
     }
