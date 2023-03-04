@@ -278,7 +278,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
   // FROG STATE 
   bool frogState = false;
   int  frogRemain = 0;
-  int levelBeforeFrog;
+  int levelBeforeFrog = level;
 
   // Asclepius and Merlin encountered
   bool metAsclepius = false;
@@ -357,8 +357,8 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         if (isDead(HP)){
           if(phoenixdown){
             phoenixdown--;
-            frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
-            tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
+            if(frogState) frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
+            if(tinyState) tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
             HP = MAX_HEALTH;
           }
           else{
@@ -562,8 +562,8 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     if (isDead(HP)){
       if(phoenixdown){
         phoenixdown--;
-        frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
-        tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
+        if(frogState) frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
+        if(tinyState) tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
         HP = MAX_HEALTH;
       }
       else{
