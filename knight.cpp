@@ -353,7 +353,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
           default:
             cout << endl;
         }
-
+        HP = HP > MAX_HEALTH ? MAX_HEALTH : HP;
         if (isDead(HP)){
           if(phoenixdown){
             phoenixdown--;
