@@ -368,6 +368,11 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
           }
         }
       }
+      if (event_index == events_nums){
+        rescue = 1;
+        display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+        return;
+      }
 
       display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
       delete[] nums;
