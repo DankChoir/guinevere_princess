@@ -560,21 +560,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
        THIS AREA IS MAINLY
           POST-COMBAT
     ----------------------*/
-    // ON DEATH
-    if (isDead(HP)){
-      if(phoenixdown){
-        phoenixdown--;
-        if(frogState) frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
-        if(tinyState) tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
-        HP = MAX_HEALTH;
-      }
-      else{
-        rescue = 0;
-        display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-        return;
-      }
-    }
-
     // Checking DE-BUFFs : Tiny & Frog State
     if(tinyRemain){
       if(remedy){
@@ -607,6 +592,21 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
     // Checking HEALTH
     HP = HP > MAX_HEALTH ? MAX_HEALTH : HP;
+
+    // ON DEATH
+    if (isDead(HP)){
+      if(phoenixdown){
+        phoenixdown--;
+        if(frogState) frog_cleanse(frogState, frogRemain, level, levelBeforeFrog);
+        if(tinyState) tiny_cleanse(tinyState, tinyRemain, HP, MAX_HEALTH);
+        HP = MAX_HEALTH;
+      }
+      else{
+        rescue = 0;
+        display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+        return;
+      }
+    }
 
     if (event_index == events_nums){
       rescue = 1;
