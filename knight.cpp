@@ -222,22 +222,23 @@ void mushTypeFour(int &HP, int* arr, int n) {
   for(int i = 0; i <n; i++){
     arr2[i] = arr[i];
     arr2[i] = arr2[i] < 0 ? (-arr2[i]) : arr2[i];
-    arr2[i] = (17*arr2[i]+9)%257;  
+    arr2[i] = (17*arr2[i]+9)%257; 
   }
 
-  if (n >= 3) {
+  if (n >= 2) {
     int max1 = arr2[0];
-    int max2 = -2147483647;
+    int max2 = -2147483647; // INT_MIN, arr2 is positive now
     int max1i = 0;
     int max2i = -1;
-
-    for (int i = 1; i < 3; i++) {
+	
+	int min_check = n < 3 ? n : 3;
+    for (int i = 1; i < min_check; i++) {
         if (arr2[i] > max1) {
             max2 = max1;
             max2i = max1i;
             max1 = arr2[i];
             max1i = i;
-        } else if (arr2[i] > max2) {
+        } else if (arr2[i] > max2 && arr2[i] < max1) {
             max2 = arr2[i];
             max2i = i;
         }
